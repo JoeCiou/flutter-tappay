@@ -42,7 +42,7 @@ class _MyAppState extends State<MyApp> {
                 returnUrl: 'flutterTappayExample://handleLinePay',
               );
 
-              if (result.type == LinePayPrimeResultType.success) {
+              if (result.status == LinePayPrimeResultStatus.success) {
                 final prime = result.prime;
                 debugPrint('Prime: $prime');
 
@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
                   } else {
                     print('Error: ${response.statusCode}, ${response.body}');
                   }
-              } else if (result.type == LinePayPrimeResultType.failure) {
+              } else if (result.status == LinePayPrimeResultStatus.failure) {
                 debugPrint('Error: ${result.code}, ${result.message}');
               }   
             },

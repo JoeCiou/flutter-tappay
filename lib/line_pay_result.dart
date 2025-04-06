@@ -1,16 +1,16 @@
-enum LinePayPrimeResultType {
+enum LinePayPrimeResultStatus {
   success,
   failure,
 }
 
 class LinePayPrimeResult {
-  final LinePayPrimeResultType type;
+  final LinePayPrimeResultStatus status;
   final String? prime;
   final int? code;
   final String? message;
 
   LinePayPrimeResult({
-    required this.type,
+    required this.status,
     this.prime,
     this.code,
     this.message,
@@ -18,7 +18,7 @@ class LinePayPrimeResult {
 
   factory LinePayPrimeResult.fromJson(Map<String, dynamic> json) {
     return LinePayPrimeResult(
-      type: LinePayPrimeResultType.values.byName(json['status'] as String),
+      status: LinePayPrimeResultStatus.values.byName(json['status'] as String),
       prime: json['prime'] as String?,
       code: json['code'] as int?,
       message: json['message'] as String?,
