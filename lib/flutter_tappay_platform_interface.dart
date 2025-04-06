@@ -40,17 +40,14 @@ abstract class FlutterTappayPlatform extends PlatformInterface {
     throw UnimplementedError('installLineApp() has not been implemented.');
   }
 
-  Future<void> getLinePayPrime({
+  Future<LinePayPrimeResult> getLinePayPrime({
     required String returnUrl,
-    required void Function(String prime) onSuccess,
-    required void Function(int code, String message) onFailure,
   }) {
     throw UnimplementedError('getLinePayPrime() has not been implemented.');
   }
 
-  Future<LinePayResult> redirectToLinePay({
+  Future<LinePayRedirectionResult> redirectToLinePay({
     required String paymentUrl,
-    required void Function(LinePayResult result) onException,
   }) {
     throw UnimplementedError('redirectToLinePay() has not been implemented.');
   }

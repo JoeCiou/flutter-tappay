@@ -5,6 +5,7 @@ import TPDirect
 public class FlutterTappayPlugin: NSObject, FlutterPlugin {
     var channel: FlutterMethodChannel!
     var linePay: TPDLinePay?
+    var flutterResult: FlutterResult?
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_tappay", binaryMessenger: registrar.messenger())
@@ -37,25 +38,21 @@ public class FlutterTappayPlugin: NSObject, FlutterPlugin {
             linePay = TPDLinePay.setup(withReturnUrl: returnUrl)
             linePay!
                 .onSuccessCallback { prime in
-                    self.channel.invokeMethod(
-                        "onLinePayCallback",
-                        arguments: [
-                            "status": "success",
-                            "prime": prime,
-                        ])
+                    result([
+                        "status": "success",
+                        "prime": prime,
+                    ])
                 }
                 .onFailureCallback { statusCode, message in
-                    self.channel.invokeMethod(
-                        "onLinePayCallback",
-                        arguments: [
-                            "status": "failure",
-                            "message": message,
-                            "code": statusCode,
-                        ])
+                    result([
+                        "status": "failure",
+                        "message": message,
+                        "code": statusCode,
+                    ])
                 }
                 .getPrime()
-            result(nil)
         case "redirectToLinePay":
+            flutterResult = result
             let arguments = call.arguments as! [String: Any?]
             let paymentUrl = arguments["paymentUrl"] as! String
             let vc = UIApplication.shared.delegate!.window!!.rootViewController!
@@ -66,6 +63,7 @@ public class FlutterTappayPlugin: NSObject, FlutterPlugin {
                 if let bankTransactionId = linePayResult.bankTransactionId { resultJson["bankTransactionId"] = bankTransactionId}
                 if let orderNumber = linePayResult.orderNumber {resultJson["orderNumber"] = orderNumber}
                 result(resultJson)
+                self.flutterResult = nil
             }
         default:
             result(FlutterMethodNotImplemented)
@@ -73,13 +71,16 @@ public class FlutterTappayPlugin: NSObject, FlutterPlugin {
     }
     
     @objc func tappayLinePayExceptionHandler(notification: Notification) {
-        let linePayResult = TPDLinePay.parseURL(notification)
-        var resultJson: [String:Any] = ["status": linePayResult.status]
-        if let recTradeId = linePayResult.recTradeId { resultJson["recTradeId"] = recTradeId }
-        if let bankTransactionId = linePayResult.bankTransactionId { resultJson["bankTransactionId"] = bankTransactionId}
-        if let orderNumber = linePayResult.orderNumber {resultJson["orderNumber"] = orderNumber}
-        
-        channel.invokeMethod("onLinePayException", arguments: resultJson)
+        if let result = flutterResult {
+            let linePayResult = TPDLinePay.parseURL(notification)
+            var resultJson: [String:Any] = ["status": linePayResult.status]
+            if let recTradeId = linePayResult.recTradeId { resultJson["recTradeId"] = recTradeId }
+            if let bankTransactionId = linePayResult.bankTransactionId { resultJson["bankTransactionId"] = bankTransactionId}
+            if let orderNumber = linePayResult.orderNumber {resultJson["orderNumber"] = orderNumber}
+            
+            result(resultJson)
+            flutterResult = nil
+        }
     }
     
     public func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {

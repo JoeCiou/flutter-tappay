@@ -1,6 +1,7 @@
 import 'package:flutter_tappay/line_pay_result.dart';
 
 import 'flutter_tappay_platform_interface.dart';
+export 'line_pay_result.dart';
 
 class FlutterTappay {
   static FlutterTappay instance = FlutterTappay._();
@@ -27,25 +28,19 @@ class FlutterTappay {
     return FlutterTappayPlatform.instance.installLineApp();
   }
 
-  Future<void> getLinePayPrime({
+  Future<LinePayPrimeResult> getLinePayPrime({
     required String returnUrl,
-    required void Function(String prime) onSuccess,
-    required void Function(int code, String message) onFailure,
   }) {
     return FlutterTappayPlatform.instance.getLinePayPrime(
       returnUrl: returnUrl,
-      onSuccess: onSuccess,
-      onFailure: onFailure,
     );
   }
 
-  Future<LinePayResult> redirectToLinePay({
+  Future<LinePayRedirectionResult> redirectToLinePay({
     required String paymentUrl,
-    required void Function(LinePayResult result) onException,
   }) {
     return FlutterTappayPlatform.instance.redirectToLinePay(
       paymentUrl: paymentUrl,
-      onException: onException,
     );
   }
 }

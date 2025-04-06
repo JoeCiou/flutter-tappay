@@ -34,43 +34,24 @@ class MethodChannelFlutterTappay extends FlutterTappayPlatform {
   }
 
   @override
-  Future<void> getLinePayPrime({
+  Future<LinePayPrimeResult> getLinePayPrime({
     required String returnUrl,
-    required void Function(String prime) onSuccess,
-    required void Function(int code, String message) onFailure,
-  }) {
-    methodChannel.setMethodCallHandler((call) async {
-      if (call.method == 'onLinePayCallback') {
-        if (call.arguments['status'] == 'success') {
-          final String prime = call.arguments['prime'];
-          onSuccess(prime);
-        } else if (call.arguments['status'] == 'failure') {
-          final int code = call.arguments['code'];
-          final String message = call.arguments['message'];
-          onFailure(code, message);
-        }
-      }
-    });
-    return methodChannel.invokeMethod('getLinePayPrime', {
+  }) async {
+    final json = await methodChannel.invokeMethod('getLinePayPrime', {
       'returnUrl': returnUrl,
     });
+
+    return LinePayPrimeResult.fromJson(Map<String, Object>.from(json));
   }
 
   @override
-  Future<LinePayResult> redirectToLinePay({
+  Future<LinePayRedirectionResult> redirectToLinePay({
     required String paymentUrl,
-    required void Function(LinePayResult result) onException,
   }) async {
-    methodChannel.setMethodCallHandler((call) async {
-      if (call.method == 'onLinePayException') {
-        final LinePayResult result = LinePayResult.fromJson(call.arguments);
-        onException(result);
-      }
-    });
     final json = await methodChannel.invokeMethod('redirectToLinePay', {
       'paymentUrl': paymentUrl,
     });
 
-    return LinePayResult.fromJson(Map<String, Object>.from(json));
+    return LinePayRedirectionResult.fromJson(Map<String, Object>.from(json));
   }
 }

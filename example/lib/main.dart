@@ -37,12 +37,16 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: ElevatedButton(
-            onPressed: () {
-              FlutterTappay.instance.getLinePayPrime(
+            onPressed: () async {
+              final result = await FlutterTappay.instance.getLinePayPrime(
                 returnUrl: 'flutterTappayExample://handleLinePay',
-                onSuccess: (prime) async {
-                  debugPrint('prime: $prime');
-                  final url = Uri.parse('https://asia-east1-jrbs-app-beta.cloudfunctions.net/testLinePay');
+              );
+
+              if (result.type == LinePayPrimeResultType.success) {
+                final prime = result.prime;
+                debugPrint('Prime: $prime');
+
+                final url = Uri.parse('https://asia-east1-jrbs-app-beta.cloudfunctions.net/testLinePay');
                   final headers = {
                     'Content-Type': 'application/json',
                   };
@@ -62,20 +66,15 @@ class _MyAppState extends State<MyApp> {
 
                     final result = await FlutterTappay.instance.redirectToLinePay(
                       paymentUrl: paymentUrl,
-                      onException: (result) {
-                        debugPrint('Error: ${result.status}');
-                      },
                     );
 
                     debugPrint('Result: ${result.status}');
                   } else {
                     print('Error: ${response.statusCode}, ${response.body}');
                   }
-                },
-                onFailure: (code, message) {
-                  print('Error: $code, $message');
-                },
-              );
+              } else if (result.type == LinePayPrimeResultType.failure) {
+                debugPrint('Error: ${result.code}, ${result.message}');
+              }   
             },
             child: const Text('Line Pay'),
           ),
